@@ -6,6 +6,12 @@ get into the cointracker directory
 
 >ruby app.rb
 
+Open a terminal
+
+> ruby app.rb
+
+This will run the code and you should open the port generally you'll see 127.0.0.1:4567
+
 Open a new terminal
 
 >irb
@@ -13,12 +19,6 @@ Open a new terminal
 >require './app.rb'
 
 this will be your connection to mongo to validate and see all the documents
-
-In a new terminal
-
-> ruby app.rb
-
-Open the port that it is describing it should be 127.0.0.1:4567
 
 Create a new account 
 Log in to said account
