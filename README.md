@@ -14,7 +14,7 @@ Open a new terminal
 
 this will be your connection to mongo to validate and see all the documents
 
-In a new termina
+In a new terminal
 
 > ruby app.rb
 
