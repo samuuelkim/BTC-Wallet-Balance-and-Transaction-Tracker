@@ -1,11 +1,10 @@
 # Cointracker_hiring
 To run clone the branch
-
 get into the cointracker directory
 
-bundle install
+>bundle install
 
-ruby app.rb
+>ruby app.rb
 
 Open a new terminal
 
