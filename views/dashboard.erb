@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <style>
+      body {
+          font-family: 'Arial', sans-serif;
+          background-color: #121212;
+          color: #c0c0c0;
+          margin: 0;
+          padding: 0;
+      }
+      .container {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 20px;
+      }
+      .card {
+          background: #1e1e1e;
+          border-radius: 8px;
+          padding: 20px;
+          margin-bottom: 20px;
+      }
+      .card h2 {
+          color: #ffffff;
+      }
+      input[type="text"],
+      input[type="submit"] {
+          padding: 10px;
+          margin: 5px 0;
+          border-radius: 4px;
+          border: none;
+      }
+      input[type="text"] {
+          width: calc(100% - 22px);
+      }
+      input[type="submit"] {
+          background-color: #308D46;
+          color: white;
+          cursor: pointer;
+      }
+      input[type="submit"]:hover {
+          background-color: #286C3A;
+      }
+      a {
+          color: #4fa8f6;
+          text-decoration: none;
+      }
+      a:hover {
+          text-decoration: underline;
+      }
+      .logout-link {
+          display: block;
+          margin-top: 20px;
+          text-align: right;
+          color: #ffffff;
+      }
+      .address-list {
+          list-style-type: none;
+          padding: 0;
+      }
+      .address-list li {
+          background: #262626;
+          border-radius: 4px;
+          padding: 10px;
+          margin-bottom: 10px;
+      }
+      .address-list form {
+          display: inline;
+      }
+      .flash-message {
+          padding: 10px;
+          margin-bottom: 10px;
+          border-radius: 4px;
+          text-align: center;
+      }
+      .flash-error {
+          background-color: #ff3860;
+          color: white;
+      }
+      .flash-success {
+          background-color: #23d160;
+          color: white;
+      }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <% if flash[:error] %>
+        <div class="flash-message flash-error"><%= flash[:error] %></div>
+    <% end %>
+    <% if flash[:success] %>
+        <div class="flash-message flash-success"><%= flash[:success] %></div>
+    <% end %>
+
+    <div class="card">
+        <form action="/addresses" method="post">
+            <input type="text" name="btc_address" placeholder="Enter BTC Address">
+            <input type="submit" value="Add Address">
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>Total Balance: $<%= @total_balance %></h2>
+        <% if !@balance_over_time_data[:daily].empty? %>
+            <%= line_chart [
+                {name: 'Daily Change Over Last 50 days ', data: @balance_over_time_data[:daily]},
+            ], height: '500px', xtitle: 'Date', ytitle: 'Balance (USD)' %>
+        <% else %>
+            <p>No balance data available.</p>
+        <% end %>
+    </div>
+
+    <div class="card">
+        <h2>Existing Addresses</h2>
+        <% if !@addresses.empty? %>
+            <ul class="address-list">
+                <% @addresses.each do |address| %>
+                    <li>
+                        <%= address.btc_address %>
+                        <!-- Link to transactions -->
+                        <a href="/transactions/<%= address.btc_address %>">View Transactions</a>
+                        <!-- Display total balance in USD -->
+                        <span>Total Balance: $<%= sprintf('%.2f', address.total_balance_in_usd) %></span>
+                        <!-- Delete button -->
+                        <form action="/remove_address/<%= address.id %>" method="post">
+                            <input type="hidden" name="_method" value="delete">
+                            <input type="submit" value="Remove">
+                        </form>
+                    </li>
+                <% end %>
+            </ul>
+        <% end %>
+    </div>
+
+    <a href="/logout" class="logout-link">Logout</a>
+  </div>
+</body>
+</html>

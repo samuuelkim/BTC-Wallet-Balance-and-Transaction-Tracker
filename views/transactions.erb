@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transactions</title>
+  <style>
+      body {
+          font-family: 'Arial', sans-serif;
+          background-color: #121212;
+          color: #c0c0c0;
+          margin: 0;
+          padding: 0;
+      }
+      .container {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 20px;
+      }
+      h1 {
+          color: #ffffff;
+          text-align: center;
+          margin-bottom: 30px;
+      }
+      table {
+          width: 100%;
+          border-collapse: collapse;
+      }
+      th, td {
+          padding: 10px;
+          text-align: left;
+          border-bottom: 1px solid #343a40;
+      }
+      th {
+          background-color: #007bff;
+          color: white;
+          position: sticky;
+          top: 0;
+      }
+      td {
+          background-color: #262626;
+          color: #ddd;
+      }
+      .truncated-addresses, .full-addresses {
+          cursor: pointer;
+          display: block;
+      }
+      .full-addresses {
+          display: none;
+      }
+      a {
+          color: #4fa8f6;
+          text-decoration: none;
+      }
+      a:hover {
+          text-decoration: underline;
+      }
+      .back-dashboard {
+          display: block;
+          text-align: center;
+          margin-top: 20px;
+          font-size: 1.2em;
+      }
+  </style>
+</head>
+<body>
+<% if @address %>
+  <h1 style="color: royalblue;">Last 50 Transactions for <%= @address.btc_address %></h1>
+  <table id="transactionTable" class="display" style="width:100%">
+    <thead>
+      <tr style="background-color: royalblue; color: white;">
+        <th>Transaction Hash</th>
+        <th>From Addresses</th>
+        <th>From Amounts (BTC)</th>
+        <th>Change Addresses</th>
+        <th>Change Amounts (BTC)</th>
+        <th>To Address</th>
+        <th>To Amount (BTC)</th>
+        <th>Time</th>
+      </tr>
+    </thead>
+  <tbody>
+    <% @transactions.each do |tx| %>
+      <tr>
+      <td style="color: #007bff;">
+        <a href="https://www.blockchain.com/btc/tx/<%= tx.transaction_id %>" target="_blank"><%= tx.transaction_id %></a>
+      </td>
+        <!-- From Addresses -->
+        <td onclick="toggleAddresses(this)">
+          <% truncated_from_addresses = tx.from_addresses.first(3) %>
+          <span class="truncated-addresses">
+            <%= truncated_from_addresses.join(', ') %><% if tx.from_addresses.count > 3 %>...<% end %>
+          </span>
+          <span class="full-addresses" style="display: none;">
+            <%= tx.from_addresses.join(', ') %>
+          </span>
+        </td>
+
+        <!-- From Amounts -->
+        <td style="color: red;" onclick="toggleAddresses(this)">
+          <% truncated_from_amounts = tx.from_amounts.zip(tx.from_amounts_in_usd).map { |amt, usd| "#{amt} BTC ($#{usd})" }.first(3) %>
+          <span class="truncated-addresses">
+            <%= truncated_from_amounts.join(', ') %><% if tx.from_amounts.length > 3 %>...<% end %>
+          </span>
+          <span class="full-addresses" style="display: none;">
+            <%= tx.from_amounts.zip(tx.from_amounts_in_usd).map { |amt, usd| "#{amt} BTC ($#{usd})" }.join(', ') %>
+          </span>
+        </td>
+
+        <!-- Change Addresses -->
+        <td onclick="toggleAddresses(this)">
+          <% truncated_change_addresses = tx.change_addresses.first(3) %>
+          <span class="truncated-addresses">
+            <%= truncated_change_addresses.join(', ') %><% if tx.change_addresses.count > 3 %>...<% end %>
+          </span>
+          <span class="full-addresses" style="display: none;">
+            <%= tx.change_addresses.join(', ') %>
+          </span>
+        </td>
+
+        <!-- Change Amounts -->
+        <td style="color: blue;" onclick="toggleAddresses(this)">
+          <% truncated_change_amounts = tx.change_amounts.zip(tx.change_amounts_in_usd).map { |amt, usd| "#{amt} BTC ($#{usd})" }.first(3) %>
+          <span class="truncated-addresses">
+            <%= truncated_change_amounts.join(', ') %><% if tx.change_amounts.length > 3 %>...<% end %>
+          </span>
+          <span class="full-addresses" style="display: none;">
+            <%= tx.change_amounts.zip(tx.change_amounts_in_usd).map { |amt, usd| "#{amt} BTC ($#{usd})" }.join(', ') %>
+          </span>
+        </td>
+
+        <td><%= tx.to_address %></td>
+        <td style="color: green;"><%= "#{tx.to_amount} BTC ($#{tx.to_amount_in_usd})" %></td>
+        <td><%= tx.timestamp.strftime('%Y-%m-%d %H:%M:%S') %></td>
+      </tr>
+    <% end %>
+  </tbody>
+  </table>
+  <% else %>
+    <p>Address not found.</p>
+  <% end %>
+<a href="/dashboard">Back to Dashboard</a>
+
+<style>
+  .truncated-addresses, .full-addresses {
+    cursor: pointer;
+  }
+  .dataTables_wrapper {
+    width: 100%;
+    margin: 0 auto;
+  }
+</style>
+
+<script>
+  function toggleAddresses(td) {
+    var truncated = td.querySelector('.truncated-addresses');
+    var full = td.querySelector('.full-addresses');
+
+    if (truncated.style.display === 'none') {
+      truncated.style.display = 'inline';
+      full.style.display = 'none';
+    } else {
+      truncated.style.display = 'none';
+      full.style.display = 'inline';
+    }
+  }
+
+  $(document).ready(function() {
+    $('#transactionTable').DataTable({
+      "responsive": true,
+      "searching": true,
+      "pageLength": 10,
+      "scrollX": true
+    });
+  });
+</script>
+</body>
+</html>

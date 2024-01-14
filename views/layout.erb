@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Cointracker</title>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+  <script src="/js/chart.js"></script>
+  <script src="/js/chartjs-adapter-date-fns.bundle.js"></script>
+  <!-- Include Chartkick -->
+  <script src="/js/chartkick.js"></script>
+  <style>
+    #transactionTable thead th {
+        position: sticky;
+        top: 0;
+        background-color: royalblue;
+        color: white;
+        z-index: 10;
+    }
+  </style>
+</head>
+<body>
+  <%= yield %>
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+      $('#transactionTable').DataTable();
+    });
+  </script>
+</body>
+</html>
