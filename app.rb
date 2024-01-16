@@ -52,11 +52,14 @@ get '/dashboard' do
   unless @addresses.empty?
     @addresses.each do |address|
       address.transactions.desc(:timestamp).each do |transaction|
-        date = transaction.timestamp.to_date
-        total_from_amounts = transaction.from_amounts.sum
-        balance_change_btc = total_from_amounts - transaction.to_amount
-        balance_change = BlockchainAPIClient.convert_btc_to_usd(balance_change_btc, get_cached_btc_to_usd_rate)
-        daily_total_balance[date] += balance_change
+        # Check if the 'to_address' is the current address or if the 'from_address' includes the current address
+        if transaction.to_address == address.btc_address || transaction.from_addresses.include?(address.btc_address)
+          date = transaction.timestamp.to_date
+          total_from_amounts = transaction.from_amounts.sum
+          balance_change_btc = total_from_amounts - transaction.to_amount
+          balance_change = BlockchainAPIClient.convert_btc_to_usd(balance_change_btc, get_cached_btc_to_usd_rate)
+          daily_total_balance[date] += balance_change
+        end
       end
     end
   end
@@ -66,7 +69,7 @@ get '/dashboard' do
     daily: daily_total_balance.transform_keys { |date| date.strftime('%Y-%m-%d') }
   }
 
-  puts "Balance over time data: #{@balance_over_time_data}"
+  puts "Balance over time data: #{@balance_over_data}"
   erb :dashboard, layout: :layout
 end
 
