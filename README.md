@@ -1,4 +1,4 @@
-# Cointracker_hiring
+# BTC Tracker
 To run clone the branch
 get into the cointracker directory
 
@@ -51,4 +51,4 @@ Considerations:
 
 >Some small considerations include success and error flashes when adding / removing BTC + signing up and logging in
 
-I just had really fun with this.  Setting up the back end was really quick as it mirrors what I do on a day to day for a project at Anchor.  The challenging part was the front end and making it visually appealing.  I am very excited to share this.
+I just had really fun with this.  Setting up the back end was really quick as it mirrors what I do on a day to day for a project at Anchor.  The challenging part was the front end and making it visually appealing.  I am very excited to share this.  Left the .env so that when you replicate you can connect to the mongodb server.  In standard practice would never ever commit .env
