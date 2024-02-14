@@ -3,7 +3,6 @@ require 'mongoid'
 require 'dotenv'
 require 'sinatra/flash'
 require 'chartkick'
-require 'importmap'
 
 enable :sessions
 set :public_folder, 'public'
@@ -57,7 +56,7 @@ get '/dashboard' do
           date = transaction.timestamp.to_date
           total_from_amounts = transaction.from_amounts.sum
           balance_change_btc = total_from_amounts - transaction.to_amount
-          balance_change = BlockchainAPIClient.convert_btc_to_usd(balance_change_btc, get_cached_btc_to_usd_rate)
+          balance_change = BlockchainAPIClient.convert_btc_to_usd(balance_change_btc, CacheHelper.get_cached_btc_to_usd_rate)
           daily_total_balance[date] += balance_change
         end
       end
@@ -104,7 +103,7 @@ post '/addresses' do
       if balance_response && balance_response[btc_address.to_sym]
         final_balance_satoshi = balance_response[btc_address.to_sym][:final_balance]
         final_balance_btc = final_balance_satoshi.to_f / 100_000_000
-        btc_to_usd_rate = get_cached_btc_to_usd_rate
+        btc_to_usd_rate = CacheHelper.get_cached_btc_to_usd_rate
         # Convert BTC to USD
         usd_amount = BlockchainAPIClient.convert_btc_to_usd(final_balance_btc, btc_to_usd_rate)
 
@@ -151,7 +150,7 @@ get '/transactions/:address' do
   @address = @user.addresses.where(btc_address: params[:address]).first
   response = BlockchainAPIClient.get_single_address(@address.btc_address)
   transactions_data = response[:txs]
-  btc_to_usd_rate = get_cached_btc_to_usd_rate
+  btc_to_usd_rate = CacheHelper.get_cached_btc_to_usd_rate
   # add paging and a loop to get all transactions
   # for now leave as 50 transactions
   @transactions = transactions_data.map do |tx_data|
@@ -179,15 +178,17 @@ get '/transactions/:address' do
   erb :transactions, layout: :'layout'
 end
 
-def get_cached_btc_to_usd_rate
-  @@rate_cache ||= { value: nil, updated_at: Time.now - 2 * 3600 }
+module CacheHelper
+  @rate_cache = { value: nil, updated_at: Time.now - 2 * 3600 }
 
-  if Time.now - @@rate_cache[:updated_at] > 3600 # cache for 1 hour
-    @@rate_cache[:value] = BlockchainAPIClient.get_exchange_rates[:USD][:last]
-    @@rate_cache[:updated_at] = Time.now
+  def self.get_cached_btc_to_usd_rate
+    if Time.now - @rate_cache[:updated_at] > 3600
+      @rate_cache[:value] = BlockchainAPIClient.get_exchange_rates[:USD][:last]
+      @rate_cache[:updated_at] = Time.now
+    end
+
+    @rate_cache[:value]
   end
-
-  @@rate_cache[:value]
 end
 
 ## test db

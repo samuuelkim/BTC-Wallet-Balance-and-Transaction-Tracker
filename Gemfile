@@ -9,3 +9,5 @@ gem 'rest-client'
 gem 'json'
 gem 'chartkick'
 gem 'htmlbeautifier'
+gem 'importmap-rails', '~> 2.0.1'
+
